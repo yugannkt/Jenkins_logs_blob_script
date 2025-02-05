@@ -5,27 +5,10 @@ import logging
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tenacity import retry, wait_exponential, stop_after_attempt, RetryError
-from azure.identity import DefaultAzureCredential
-from azure.keyvault.secrets import SecretClient
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-
-def get_secret_from_keyvault(vault_url, secret_name):
-    """Fetch a secret value from Azure Key Vault."""
-    try:
-        # Authenticate using DefaultAzureCredential
-        credential = DefaultAzureCredential()
-        secret_client = SecretClient(vault_url=vault_url, credential=credential)
-        
-        # Get the secret value
-        secret = secret_client.get_secret(secret_name)
-        logging.info(f"Fetched secret: {secret_name}")
-        return secret.value
-    except Exception as e:
-        logging.error(f"Error fetching secret {secret_name}: {e}")
-        raise
 
 
 @retry(wait=wait_exponential(min=1, max=10), stop=stop_after_attempt(5))
@@ -71,7 +54,7 @@ def get_jenkins_logs(jenkins_url, user, api_token):
                         future_to_log[future] = (job_name, build_number)
                 except requests.RequestException as e:
                     logging.error(f"Error fetching builds for job {job_name}: {e}")
-                    continue  # Skip this job and move to the next one
+                    continue 
 
             # Collect results as they complete
             for future in as_completed(future_to_log):
@@ -94,7 +77,6 @@ def upload_logs_to_azure(blob_service_client, container_name, logs):
         logging.info("Uploading logs to Azure Blob Storage...")
         container_client = blob_service_client.get_container_client(container_name)
 
-        # Check if the container exists, if not, create it
         try:
             container_client.get_container_properties()
             logging.info(f"Container '{container_name}' already exists.")
@@ -104,8 +86,7 @@ def upload_logs_to_azure(blob_service_client, container_name, logs):
                 container_client.create_container()
             except Exception as e:
                 logging.error(f"Error creating container '{container_name}': {e}")
-                raise  # Reraise the error to stop the script if creation fails
-
+                raise  
         for log_name, log_content in logs.items():
             # Get the current UTC date (without time)
             utc_time = datetime.utcnow()
@@ -132,11 +113,12 @@ if __name__ == "__main__":
 
         try:
             # Fetch secrets from Azure Key Vault
-            JENKINS_URL = get_secret_from_keyvault(KEYVAULT_URL, "JenkinsURL")
-            JENKINS_USER = get_secret_from_keyvault(KEYVAULT_URL, "JenkinsUser")
-            JENKINS_API_TOKEN = get_secret_from_keyvault(KEYVAULT_URL, "JENKINS-API-TOKEN")
-            AZURE_CONNECTION_STRING = get_secret_from_keyvault(KEYVAULT_URL, "AzureConnectionString")
-            AZURE_CONTAINER_NAME = get_secret_from_keyvault(KEYVAULT_URL, "AZURE-CONTAINER-NAME")
+            JENKINS_URL = ""
+            JENKINS_USER = ""
+            JENKINS_API_TOKEN = ""  
+            AZURE_CONNECTION_STRING = ""  
+            AZURE_CONTAINER_NAME = "" 
+
 
             # Get Jenkins logs
             logs = get_jenkins_logs(JENKINS_URL, JENKINS_USER, JENKINS_API_TOKEN)
