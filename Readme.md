@@ -1,12 +1,11 @@
 # Jenkins Logs to Azure Blob Storage with Azure Key Vault
 
-This Python script automates the process of fetching Jenkins build logs and uploading them to Azure Blob Storage. It integrates with Azure Key Vault to securely retrieve necessary credentials (like Jenkins URL, API token, and Azure storage connection string) and uses Azure's `BlobServiceClient` for interaction with Azure Blob Storage.
+This Python script automates the process of fetching Jenkins build logs and uploading them to Azure Blob Storage and Uses Azure's `BlobServiceClient` for interaction with Azure Blob Storage.
 
 ## Features
 - **Fetch Jenkins Logs**: Retrieves logs from all Jenkins jobs and builds.
 - **Parallel Processing**: Uses `ThreadPoolExecutor` to fetch logs in parallel, enhancing performance.
 - **Azure Blob Storage**: Uploads logs to Azure Blob Storage with a timestamped naming convention.
-- **Secret Management**: Fetches credentials securely from Azure Key Vault.
 
 ---
 
@@ -14,7 +13,7 @@ This Python script automates the process of fetching Jenkins build logs and uplo
 
 1. **Clone the Repository**:
 
-    ```bash
+    ```
     git clone https://github.com/yourusername/jenkins-logs-to-azure.git
     cd jenkins-logs-to-azure
     ```
@@ -36,12 +35,11 @@ This Python script automates the process of fetching Jenkins build logs and uplo
 4. **Configure Environment Variables**:
    
    Set the following environment variables for your specific setup:
-   - `KEYVAULT_URL`: Azure Key Vault URL where Jenkins credentials and Azure connection string are stored.
-   - `JENKINS_URL`: URL to your Jenkins server (retrieved from Key Vault).
-   - `JENKINS_USER`: Jenkins username (retrieved from Key Vault).
-   - `JENKINS_API_TOKEN`: Jenkins API token (retrieved from Key Vault).
-   - `AZURE_CONNECTION_STRING`: Azure Blob Storage connection string (retrieved from Key Vault).
-   - `AZURE_CONTAINER_NAME`: The Azure Blob container name for storing logs (retrieved from Key Vault).
+   - `JENKINS_URL`: URL to your Jenkins server. 
+   - `JENKINS_USER`: Jenkins username.
+   - `JENKINS_API_TOKEN`: Jenkins API token.
+   - `AZURE_CONNECTION_STRING`: Azure Blob Storage connection string.
+   - `AZURE_CONTAINER_NAME`: The Azure Blob container name for storing logs.
 
 5. **Run the Script**:
 
@@ -59,11 +57,7 @@ This Python script automates the process of fetching Jenkins build logs and uplo
   
 - **fetch_build_log**: It fetches the console text (logs) of each build using the URL provided by Jenkins. It also includes retry logic using the `tenacity` library to ensure the script handles transient network issues gracefully.
 
-### 2. **Azure Key Vault Integration (`get_secret_from_keyvault`)**
-
-- The function `get_secret_from_keyvault` fetches credentials (Jenkins URL, API token, Azure connection string, etc.) from Azure Key Vault. This ensures the sensitive information like API tokens and connection strings are securely handled and not hard-coded.
-
-### 3. **Uploading Logs to Azure Blob Storage (`upload_logs_to_azure`)**
+### 2. **Uploading Logs to Azure Blob Storage (`upload_logs_to_azure`)**
 
 - This function uploads logs to Azure Blob Storage. It checks if the specified container exists and creates it if not. The logs are uploaded with a timestamp format in the filename (`log_name_YYYY-MM-DD.txt`), ensuring the files are organized by date.
 
@@ -74,7 +68,6 @@ This Python script automates the process of fetching Jenkins build logs and uplo
 - **`requests`**: To interact with Jenkins API and fetch build logs.
 - **`azure-storage-blob`**: For uploading logs to Azure Blob Storage.
 - **`tenacity`**: To implement retry logic when fetching logs in case of failures.
-- **`azure-identity` and `azure-keyvault-secrets`**: To authenticate and retrieve secrets securely from Azure Key Vault.
 - **`concurrent.futures`**: To execute tasks (log fetches) concurrently, speeding up the process.
 
 ---
